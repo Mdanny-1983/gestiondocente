@@ -1,0 +1,528 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2c3e50">
+    <title>Gestión Docente Pro - 2026</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #7f8c8d;
+            --accent: #3498db;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f1c40f;
+            --purple: #9b59b6;
+            --bg: #f5f6fa;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 70px;
+        }
+
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); z-index: 10000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;
+            padding: 20px; box-sizing: border-box;
+        }
+
+        #pass-input {
+            margin-bottom: 15px; padding: 12px; border-radius: 8px; border: none;
+            width: 200px; text-align: center; font-size: 18px;
+        }
+
+        header { background: var(--primary); color: white; padding: 15px; text-align: center; }
+        header h1 { margin: 0; font-size: 1.4rem; }
+        main { padding: 15px; max-width: 950px; margin: 0 auto; }
+
+        .card {
+            background: var(--card-bg); border-radius: 12px; padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+
+        .panel-control { display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; }
+        .flex-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .btn { 
+            padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; 
+            font-weight: bold; color: white; display: inline-flex; align-items: center; 
+            justify-content: center; gap: 5px; font-size: 0.9rem; transition: background 0.2s;
+        }
+        .btn-add { background: var(--success); width: 100%; }
+        .btn-add:hover { background: #27ae60; }
+        .btn-cfg { background: var(--accent); }
+        .btn-sec { background: var(--secondary); }
+        
+        input, select { padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 0.95rem; }
+        .input-buscador { width: 100%; box-sizing: border-box; margin-bottom: 10px; border-color: var(--accent); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px 6px; text-align: center; border-bottom: 1px solid #eee; }
+        th { font-size: 0.85rem; color: var(--secondary); text-transform: uppercase; }
+        
+        .nombre-alumno { cursor: pointer; color: var(--accent); display: inline-block; text-decoration: underline; }
+        .badge-hist { font-size: 10px; background: #eef2f3; padding: 2px 6px; border-radius: 4px; margin-right: 2px; color: #555; }
+        .fila-alerta { background-color: #fff5f5; }
+        
+        .btn-nota-bitacora { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; }
+
+        /* Modales */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; padding: 20px; border-radius: 12px; max-width: 500px; width: 90%;
+            max-height: 80vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .close-modal { font-size: 24px; cursor: pointer; color: var(--secondary); }
+
+        #navbar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 60px;
+            background: var(--primary); display: flex; justify-content: space-around;
+            align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 999;
+        }
+        #navbar button {
+            background: none; border: none; color: #bdc3c7; font-size: 0.9rem;
+            cursor: pointer; display: flex; flex-direction: column; align-items: center; width: 33%; height: 100%; justify-content: center;
+        }
+        #navbar button.active { color: white; font-weight: bold; background: rgba(255,255,255,0.1); }
+
+        @media print {
+            body { padding-bottom: 0; background: white; }
+            #navbar, .panel-control, #login-screen, header, th:last-child, td:last-child, .btn-nota-bitacora, .input-buscador { display: none !important; }
+            .card { box-shadow: none; padding: 0; }
+            th { color: black; border-bottom: 2px solid black; }
+            tr.fila-alerta { background: none !important; border: 1px dashed red; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <h2 style="margin-bottom: 20px;">Acceso Docente</h2>
+    <input type="password" id="pass-input" placeholder="Contraseña">
+    <button onclick="verificarLogin()" class="btn" style="background: var(--accent); min-width: 200px;">Entrar al Sistema</button>
+</div>
+
+<header><h1 id="titulo-app">Gestión Docente</h1></header>
+
+<main>
+    <div class="card">
+        <div id="info-header"></div>
+
+        <div class="panel-control">
+            <div style="display: flex; gap: 10px;">
+                <input type="date" id="fecha" onchange="actualizarInterfaz()" style="flex:1">
+                <select id="actividad" onchange="actualizarInterfaz()" style="flex:1">
+                    <option>Asistencia</option>
+                    <option>Trabajo en clase</option>
+                    <option>Evaluación</option>
+                </select>
+            </div>
+
+            <button class="btn btn-add" onclick="agregarEstudiante()">+ Nuevo Alumno</button>
+
+            <div class="flex-btns">
+                <button class="btn btn-cfg" onclick="configurarSistema()">⚙️ Nombres</button>
+                <button class="btn btn-sec" onclick="exportarDatos()">💾 Backup JSON</button>
+                <button class="btn btn-sec" onclick="document.getElementById('importFile').click()">📂 Importar</button>
+                <button class="btn btn-sec" style="background: #27ae60" onclick="exportarExcelCSV()">📊 Exportar Excel</button>
+                <button class="btn btn-sec" style="background: var(--purple)" onclick="cerrarTrimestre()">🔒 Cierre</button>
+                <button class="btn btn-sec" style="background: #16a085" onclick="window.print()">🖨️ Imprimir</button>
+                <input type="file" id="importFile" style="display:none" onchange="importarDatos(event)">
+            </div>
+        </div>
+
+        <input type="text" id="buscador" class="input-buscador" placeholder="🔍 Buscar alumno por nombre..." oninput="actualizarInterfaz()">
+
+        <div style="overflow-x: auto;">
+            <div id="tabla-container"></div>
+        </div>
+    </div>
+</main>
+
+<div id="modal-alumno" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-alumno-nombre" style="margin:0;">Historial</h3>
+            <span class="close-modal" onclick="cerrarModal()">&times;</span>
+        </div>
+        <div id="modal-alumno-cuerpo" style="margin-top:15px;"></div>
+        <div style="margin-top:20px; display:flex; gap:10px; justify-content: flex-end;">
+            <button class="btn btn-cfg" id="btn-modal-editar">Editar Nombre</button>
+            <button class="btn btn-sec" onclick="cerrarModal()">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<nav id="navbar"></nav>
+
+<script>
+    let data = JSON.parse(localStorage.getItem('profe_complete_db')) || {
+        config: { escuela1: "ESJA 13", escuela2: "ESJA 59", materiaPrincipal: "Psicología", password: "1234" },
+        vista: 'esja13', tutoria: '2do', estudiantes: []
+    };
+
+    function escapeHTML(str) {
+        if(!str) return '';
+        return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+    }
+
+    function verificarLogin() {
+        const pass = document.getElementById('pass-input').value;
+        if(pass === data.config.password) { document.getElementById('login-screen').style.display = 'none'; } 
+        else { alert("Contraseña incorrecta"); }
+    }
+
+    function guardar() {
+        localStorage.setItem('profe_complete_db', JSON.stringify(data));
+        actualizarInterfaz();
+    }
+
+    function configurarSistema() {
+        const nEsc1 = prompt("Nombre Escuela 1:", data.config.escuela1);
+        const nEsc2 = prompt("Nombre Escuela 2:", data.config.escuela2);
+        const nMat = prompt("Nombre Materia Principal:", data.config.materiaPrincipal);
+        const nPass = prompt("Nueva Contraseña:", data.config.password);
+
+        if(nEsc1) data.config.escuela1 = nEsc1.trim();
+        if(nEsc2) data.config.escuela2 = nEsc2.trim();
+        if(nMat) data.config.materiaPrincipal = nMat.trim();
+        if(nPass) data.config.password = nPass.trim();
+
+        guardar();
+        location.reload();
+    }
+
+    function agregarEstudiante() {
+        const nom = prompt("Nombre completo del alumno:");
+        if (!nom || !nom.trim()) return;
+        
+        data.estudiantes.push({
+            id: Date.now(), nombre: nom.trim(),
+            escuela: data.vista === 'esja13' ? data.config.escuela1 : data.config.escuela2,
+            materia: data.vista === 'tutorias' ? `Tutoría ${data.tutoria}` : data.config.materiaPrincipal,
+            asistencias: {}, calificaciones: {}, archivo_trimestres: {}, bitacora: {}
+        });
+        guardar();
+    }
+
+    function borrarEstudiante(id) {
+        if(confirm("¿Eliminar permanentemente de la lista?")) {
+            data.estudiantes = data.estudiantes.filter(e => e.id !== id);
+            guardar();
+            cerrarModal();
+        }
+    }
+
+    function cargarAsist(id, val) {
+        const f = document.getElementById('fecha').value;
+        if(!f) return alert("Selecciona una fecha válida");
+        const alu = data.estudiantes.find(e => e.id === id);
+        if(alu) {
+            if(val === "") { delete alu.asistencias[f]; } 
+            else { alu.asistencias[f] = val; }
+            guardar();
+        }
+    }
+
+    function cargarNota(id, val) {
+        const f = document.getElementById('fecha').value;
+        const act = document.getElementById('actividad').value;
+        if(!f) return alert("Selecciona una fecha válida");
+        
+        const alu = data.estudiantes.find(e => e.id === id);
+        if(alu) {
+            if(!alu.calificaciones[f]) alu.calificaciones[f] = {};
+            alu.calificaciones[f][act] = val === "" ? null : parseFloat(val);
+            guardar();
+        }
+    }
+
+    function abrirNotaBitacora(id) {
+        const f = document.getElementById('fecha').value;
+        if(!f) return alert("Selecciona una fecha primero");
+        const alu = data.estudiantes.find(e => e.id === id);
+        if(!alu) return;
+        if(!alu.bitacora) alu.bitacora = {};
+
+        const notaActual = alu.bitacora[f] || "";
+        const nuevaNota = prompt(`Anotación pedagógica para ${alu.nombre}:`, notaActual);
+        
+        if(nuevaNota === null) return;
+        if(nuevaNota.trim() === "") { delete alu.bitacora[f]; } 
+        else { alu.bitacora[f] = nuevaNota.trim(); }
+        guardar();
+    }
+
+    function verFichaAlumno(id) {
+        const alu = data.estudiantes.find(e => e.id === id);
+        if(!alu) return;
+
+        document.getElementById('modal-alumno-nombre').innerText = alu.nombre;
+        
+        const inasistencias = Object.entries(alu.asistencias)
+            .filter(([_, estado]) => estado === 'A' || estado === '0.5')
+            .map(([fecha, estado]) => {
+                const p = fecha.split('-');
+                return `${p[2]}/${p[1]} (${estado === 'A' ? 'Falta' : '¼ o ½ Falta'})`;
+            });
+
+        let bitacoraHtml = "<ul>";
+        let tieneBitacora = false;
+        if(alu.bitacora) {
+            Object.entries(alu.bitacora).forEach(([fecha, texto]) => {
+                const p = fecha.split('-');
+                bitacoraHtml += `<li><strong>${p[2]}/${p[1]}:</strong> ${escapeHTML(texto)}</li>`;
+                tieneBitacora = true;
+            });
+        }
+        bitacoraHtml += "</ul>";
+        if(!tieneBitacora) bitacoraHtml = "<p style='color:var(--secondary); font-size:0.9rem;'>Sin anotaciones.</p>";
+
+        let notasHtml = "<ul>";
+        let tieneNotas = false;
+        Object.entries(alu.calificaciones).forEach(([fecha, tareas]) => {
+            Object.entries(tareas).forEach(([tipo, nota]) => {
+                if(nota !== null && nota !== "") {
+                    const p = fecha.split('-');
+                    notasHtml += `<li><strong>${p[2]}/${p[1]}</strong> - ${tipo}: <span style="color:var(--accent); font-weight:bold;">${nota}</span></li>`;
+                    tieneNotas = true;
+                }
+            });
+        });
+        notasHtml += "</ul>";
+        if(!tieneNotas) notasHtml = "<p style='color:var(--secondary); font-size:0.9rem;'>Sin notas.</p>";
+
+        document.getElementById('modal-alumno-cuerpo').innerHTML = `
+            <h4>❌ Registro de Faltas (${inasistencias.length}):</h4>
+            ${inasistencias.length > 0 ? `<div style="background:#f9f9f9; padding:10px; border-radius:6px; max-height:90px; overflow-y:auto; font-size:0.9rem;">${inasistencias.join(', ')}</div>` : "<p style='color:var(--success);'>Asistencia perfecta.</p>"}
+            <h4>📌 Bitácora / Observaciones:</h4> ${bitacoraHtml}
+            <h4>📝 Calificaciones:</h4> ${notasHtml}
+        `;
+        
+        document.getElementById('btn-modal-editar').onclick = function() {
+            const nuevoNom = prompt("Editar nombre:", alu.nombre);
+            if(nuevoNom && nuevoNom.trim()) { alu.nombre = nuevoNom.trim(); guardar(); verFichaAlumno(id); }
+        };
+        document.getElementById('modal-alumno').style.display = 'flex';
+    }
+
+    function cerrarModal() { document.getElementById('modal-alumno').style.display = 'none'; }
+
+    function actualizarInterfaz() {
+        const fAct = document.getElementById('fecha').value;
+        const aAct = document.getElementById('actividad').value;
+        const textoBuscador = document.getElementById('buscador').value.toLowerCase().trim();
+        const escAct = data.vista === 'esja13' ? data.config.escuela1 : data.config.escuela2;
+        const matAct = data.vista === 'tutorias' ? `Tutoría ${data.tutoria}` : data.config.materiaPrincipal;
+
+        const nav = document.getElementById('navbar');
+        nav.innerHTML = `
+            <button class="${data.vista === 'esja13' ? 'active' : ''}" onclick="data.vista='esja13'; guardar()">🏫 ${escapeHTML(data.config.escuela1)}</button>
+            <button class="${data.vista === 'esja59' ? 'active' : ''}" onclick="data.vista='esja59'; guardar()">🏫 ${escapeHTML(data.config.escuela2)}</button>
+            <button class="${data.vista === 'tutorias' ? 'active' : ''}" onclick="data.vista='tutorias'; guardar()">👨‍🏫 Tutorías</button>
+        `;
+
+        let header = `<h2>${escapeHTML(escAct)} - ${escapeHTML(matAct)}</h2>`;
+        if(data.vista === 'tutorias') {
+            header += `<div style="margin-bottom:10px; display:flex; gap:5px;" class="no-print">
+                <button onclick="data.tutoria='2do'; guardar()" style="background:${data.tutoria==='2do'?'var(--accent)':'#ccc'}; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer;">2do Año</button>
+                <button onclick="data.tutoria='3er'; guardar()" style="background:${data.tutoria==='3er'?'var(--accent)':'#ccc'}; color:white; border:none; padding:6px 12px; border-radius:5px; cursor:pointer;">3er Año</button>
+            </div>`;
+        }
+        document.getElementById('info-header').innerHTML = header;
+
+        // FILTRADO COMPUESTO: Por sección/materia Y por el texto del buscador
+        const lista = data.estudiantes.filter(e => {
+            const matchesMateria = e.escuela === escAct && e.materia === matAct;
+            const matchesBuscador = e.nombre.toLowerCase().includes(textoBuscador);
+            return matchesMateria && matchesBuscador;
+        });
+
+        document.getElementById('actividad').style.background = aAct === "Asistencia" ? "#eef2f3" : "#fff";
+
+        let html = `<table>
+            <thead>
+                <tr>
+                    <th style="text-align:left">Alumno</th>
+                    <th>Asist. Dia</th>
+                    <th>📌</th>
+                    <th>${aAct === "Asistencia" ? "Inasist. Totales" : "Nota del Día"}</th>
+                    <th>% Asist</th>
+                    <th>Prom. ${escapeHTML(aAct === "Asistencia" ? "Eval." : aAct)}</th> 
+                    <th>Prom. Gral</th> 
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+        lista.forEach(e => {
+            const asist = e.asistencias[fAct] || "";
+            const tieneNotaHoy = e.bitacora && e.bitacora[fAct] ? "📌" : "✏️";
+            
+            let faltasComputadas = 0;
+            Object.values(e.asistencias).forEach(v => {
+                if(v === 'A') faltasComputadas += 1;
+                if(v === '0.5') faltasComputadas += 0.5;
+            });
+
+            let celdaCentral = "";
+            if(aAct === "Asistencia") {
+                celdaCentral = `<span style="font-weight:bold; color:${faltasComputadas > 4 ? 'var(--danger)' : 'var(--text)'}">${faltasComputadas}</span>`;
+            } else {
+                const nota = (e.calificaciones[fAct] && e.calificaciones[fAct][aAct] !== undefined) ? e.calificaciones[fAct][aAct] : "";
+                celdaCentral = `<input type="number" value="${nota}" min="1" max="10" step="0.1" style="width:45px; padding:4px; text-align:center;" onchange="cargarNota(${e.id}, this.value)">`;
+            }
+            
+            const totalDiasMapeados = Object.keys(e.asistencias).length;
+            let diasPresente = 0;
+            Object.values(e.asistencias).forEach(v => {
+                if(v === 'P') diasPresente += 1;
+                if(v === '0.5') diasPresente += 0.5;
+            });
+            const porc = totalDiasMapeados > 0 ? ((diasPresente / totalDiasMapeados) * 100).toFixed(0) : 100;
+            
+            const targetAct = aAct === "Asistencia" ? "Evaluación" : aAct;
+            let nFiltradas = [];
+            Object.values(e.calificaciones).forEach(d => { if (d[targetAct]) nFiltradas.push(d[targetAct]); });
+            const promFiltrado = nFiltradas.length > 0 ? (nFiltradas.reduce((a,b)=>a+b,0)/nFiltradas.length).toFixed(1) : "-";
+
+            let nGenerales = [];
+            Object.values(e.calificaciones).forEach(d => Object.values(d).forEach(n => { if(n) nGenerales.push(n) }));
+            const promGeneral = nGenerales.length > 0 ? (nGenerales.reduce((a,b)=>a+b,0)/nGenerales.length).toFixed(1) : "0.0";
+
+            const enRiesgo = porc < 75 || (promGeneral !== "0.0" && parseFloat(promGeneral) < 6.0);
+            const claseFila = enRiesgo ? 'class="fila-alerta"' : '';
+
+            let hist = "";
+            if(e.archivo_trimestres) {
+                Object.entries(e.archivo_trimestres).forEach(([periodo, v]) => {
+                    hist += `<span class="badge-hist" title="${escapeHTML(periodo)}">${v.promedio}</span>`;
+                });
+            }
+
+            html += `<tr ${claseFila}>
+                <td style="text-align:left">
+                    <strong class="nombre-alumno" onclick="verFichaAlumno(${e.id})">${escapeHTML(e.nombre)}</strong>
+                    <div style="margin-top:4px">${hist}</div>
+                </td>
+                <td><select onchange="cargarAsist(${e.id}, this.value)" style="padding:4px;">
+                    <option value="" ${asist===''?'selected':''}>-</option>
+                    <option value="P" ${asist==='P'?'selected':''}>P</option>
+                    <option value="A" ${asist==='A'?'selected':''}>A</option>
+                    <option value="0.5" ${asist==='0.5'?'selected':''}>½ F</option>
+                </select></td>
+                <td><button class="btn-nota-bitacora" onclick="abrirNotaBitacora(${e.id})">${tieneNotaHoy}</button></td>
+                <td>${celdaCentral}</td>
+                <td style="color:${porc<75?'var(--danger)':'var(--success)'}; font-weight:bold;">${porc}%</td>
+                <td style="font-weight:bold; color:var(--accent);">${promFiltrado}</td> 
+                <td style="color:var(--secondary); font-size:0.95rem;">${promGeneral}</td> 
+                <td><button onclick="borrarEstudiante(${e.id})" style="border:none; background:none; color:var(--danger); font-size:18px; cursor:pointer;">&times;</button></td>
+            </tr>`;
+        });
+        
+        document.getElementById('tabla-container').innerHTML = lista.length > 0 ? html + "</tbody></table>" : "<p style='text-align:center; padding:20px; color:var(--secondary);'>No se encontraron alumnos.</p>";
+    }
+
+    // NUEVA FUNCIÓN: Exportación directa a formato Excel de la lista activa
+    function exportarExcelCSV() {
+        const escAct = data.vista === 'esja13' ? data.config.escuela1 : data.config.escuela2;
+        const matAct = data.vista === 'tutorias' ? `Tutoría ${data.tutoria}` : data.config.materiaPrincipal;
+        const lista = data.estudiantes.filter(e => e.escuela === escAct && e.materia === matAct);
+
+        if(lista.length === 0) return alert("No hay datos para exportar.");
+
+        // Encabezados con codificación correcta para caracteres en español (BOM)
+        let csvContent = "\uFEFF"; 
+        csvContent += "Alumno;Inasistencias Totales;Porcentaje Asistencia;Promedio General\n";
+
+        lista.forEach(e => {
+            let faltas = 0;
+            Object.values(e.asistencias).forEach(v => {
+                if(v === 'A') faltas += 1;
+                if(v === '0.5') faltas += 0.5;
+            });
+            const totalDias = Object.keys(e.asistencias).length;
+            let diasPres = 0;
+            Object.values(e.asistencias).forEach(v => {
+                if(v === 'P') diasPres += 1;
+                if(v === '0.5') diasPres += 0.5;
+            });
+            const porc = totalDias > 0 ? ((diasPres / totalDias) * 100).toFixed(0) : 100;
+
+            let nGrales = [];
+            Object.values(e.calificaciones).forEach(d => Object.values(d).forEach(n => { if(n) nGrales.push(n) }));
+            const prom = nGrales.length > 0 ? (nGrales.reduce((a,b)=>a+b,0)/nGrales.length).toFixed(1) : "0.0";
+
+            csvContent += `"${e.nombre}";${faltas};${porc}%;${prom}\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", `Planilla_${escAct.replace(/\s+/g, '_')}_2026.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function exportarDatos() {
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `backup_docente_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+    }
+
+    function importarDatos(e) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const parsed = JSON.parse(ev.target.result);
+                if(parsed.config && parsed.estudiantes) { data = parsed; guardar(); alert("Importado."); location.reload(); } 
+                else { alert("Estructura inválida."); }
+            } catch (err) { alert("Error."); }
+        };
+        reader.readAsText(e.target.files[0]);
+    }
+
+    function cerrarTrimestre() {
+        const escAct = data.vista === 'esja13' ? data.config.escuela1 : data.config.escuela2;
+        const matAct = data.vista === 'tutorias' ? `Tutoría ${data.tutoria}` : data.config.materiaPrincipal;
+        const lista = data.estudiantes.filter(e => e.escuela === escAct && e.materia === matAct);
+        
+        if (lista.length === 0) return alert("No hay estudiantes.");
+        const nombrePeriodo = prompt("Nombre del periodo (ej: 1er Trimestre):");
+        if (!nombrePeriodo || !nombrePeriodo.trim()) return;
+        
+        lista.forEach(e => {
+            if (!e.archivo_trimestres) e.archivo_trimestres = {};
+            let nts = [];
+            Object.values(e.calificaciones).forEach(d => Object.values(d).forEach(n => { if(n) nts.push(n) }));
+            const p = nts.length > 0 ? (nts.reduce((a,b)=>a+b,0)/nts.length).toFixed(1) : "0.0";
+            e.archivo_trimestres[nombrePeriodo.trim()] = { promedio: p };
+            e.calificaciones = {}; e.asistencias = {}; if(e.bitacora) e.bitacora = {};
+        });
+        guardar();
+        alert(`Período cerrado.`);
+    }
+
+    document.getElementById('fecha').valueAsDate = new Date();
+    actualizarInterfaz();
+</script>
+</body>
+</html>
